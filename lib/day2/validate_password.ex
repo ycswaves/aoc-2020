@@ -1,6 +1,25 @@
 defmodule Password do
+  @moduledoc """
+  AOC day 2 tasks
+  """
+
   @input_file_path Path.expand('./input.txt', __DIR__)
 
+  @doc ~S"""
+  Part 1: validate password using **old** policy
+
+  ## Parameters
+    - `entry` - String that represents a rule-password entry from the input file
+
+  ## Examples
+      Method 1
+      iex> Password.load_report() |> Enum.count(&Password.validate_group_by/1)
+      580
+
+      Method 2
+      iex> Password.load_report() |> Enum.count(&Password.validate_filter_by/1)
+      580
+  """
   def validate_filter_by(entry) do
     [range, required_letter, password] = tokenize_rule(entry)
 
@@ -33,6 +52,16 @@ defmodule Password do
     end
   end
 
+  @doc ~S"""
+  Part 2: validate password using **new** policy
+
+  ## Parameters
+    - `entry` - String that represents a rule-password entry from the input file
+
+  ## Example
+      iex> Password.load_report() |> Enum.count(&Password.validate_by_new_rule/1)
+      611
+  """
   def validate_by_new_rule(entry) do
     [range, required_letter, password] = tokenize_rule(entry)
 
@@ -59,11 +88,6 @@ defmodule Password do
 
   def load_report do
     File.read!(@input_file_path)
-    |> String.split("\n")
-    |> Enum.reject(&(&1 == ""))
+    |> String.split("\n", trim: true)
   end
 end
-
-Password.load_report() |> Enum.count(&Password.validate_group_by/1) |> IO.inspect()
-Password.load_report() |> Enum.count(&Password.validate_filter_by/1) |> IO.inspect()
-Password.load_report() |> Enum.count(&Password.validate_by_new_rule/1) |> IO.inspect()
