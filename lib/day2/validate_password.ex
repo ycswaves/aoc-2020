@@ -6,35 +6,35 @@ defmodule Password do
   @input_file_path Path.expand('./input.txt', __DIR__)
 
   @doc ~S"""
-  Part 1: validate password using **old** policy
+  Part 1: validate password using **old** policy, by removing required letter and compare the length with the original password
 
   ## Parameters
     - `entry` - String that represents a rule-password entry from the input file
 
   ## Examples
-      Method 1
-      iex> Password.load_report() |> Enum.count(&Password.validate_group_by/1)
-      580
-
-      Method 2
       iex> Password.load_report() |> Enum.count(&Password.validate_filter_by/1)
       580
   """
   def validate_filter_by(entry) do
     [range, required_letter, password] = tokenize_rule(entry)
 
-    [min, max] = parse_range(range)
-
-    password_without_required =
-      password
-      |> String.graphemes()
-      |> Enum.reject(&(&1 == required_letter))
-      |> Enum.join()
-
+    password_without_required = String.replace(password, required_letter, "")
     required_letter_count = String.length(password) - String.length(password_without_required)
+
+    [min, max] = parse_range(range)
     min <= required_letter_count and required_letter_count <= max
   end
 
+  @doc ~S"""
+  Part 1: validate password using **old** policy, using `Enum.frequencies`
+
+  ## Parameters
+    - `entry` - String that represents a rule-password entry from the input file
+
+  ## Examples
+      iex> Password.load_report() |> Enum.count(&Password.validate_group_by/1)
+      580
+  """
   def validate_group_by(entry) do
     [range, required_letter, password] = tokenize_rule(entry)
 
@@ -50,6 +50,33 @@ defmodule Password do
       _ ->
         false
     end
+  end
+
+  @doc ~S"""
+  Part 1: validate password using **old** policy, using regex
+
+  ## Parameters
+    - `entry` - String that represents a rule-password entry from the input file
+
+  ## Examples
+      iex> Password.load_report() |> Enum.count(&Password.validate_by_regex/1)
+      580
+  """
+  def validate_by_regex(entry) do
+    [range, required_letter, password] = tokenize_rule(entry)
+
+    range = String.replace(range, "-", ",")
+
+    validation_regex =
+      Regex.compile!("^[^#{required_letter}]*#{required_letter}{#{range}}[^#{required_letter}]*$")
+
+    sorted_password =
+      password
+      |> String.graphemes()
+      |> Enum.sort()
+      |> Enum.join()
+
+    String.match?(sorted_password, validation_regex)
   end
 
   @doc ~S"""
