@@ -3,4 +3,5 @@ defmodule DocTest do
   doctest Report
   doctest Password
   doctest Trajectory
+  doctest Passport
 end
